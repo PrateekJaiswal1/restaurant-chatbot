@@ -25,17 +25,17 @@ public class ChatController {
 
         try {
             String response = anthropicService.chat(chatRequest);
-            
+
             Map<String, String> result = new HashMap<>();
             result.put("reply", response);
-            
+
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error processing chat request", e);
-            
+
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("reply", "Sorry, something went wrong. Please try again later.");
-            
+
             return ResponseEntity.status(500).body(errorResponse);
         }
     }
