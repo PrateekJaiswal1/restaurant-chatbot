@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Admin Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* ── LOGIN ── */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-card h1 {
+            font-size: 24px;
+            margin-bottom: 6px;
+            color: #1a1a2e;
+        }
+
+        .login-card p {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            font-size: 15px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .login-card input:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover { background: #c0392b; }
+
+        .login-error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        /* ── MAIN APP ── */
+        #app { display: none; }
+
+        header {
+            background: #1a1a2e;
+            color: white;
+            padding: 16px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { font-size: 20px; }
+        header span { font-size: 13px; color: #aaa; }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+        .tabs {
+            background: white;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            padding: 0 28px;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #888;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #e74c3c;
+            border-bottom-color: #e74c3c;
+        }
+
+        .tab:hover { color: #e74c3c; }
+
+        .content {
+            max-width: 860px;
+            margin: 32px auto;
+            padding: 0 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 { font-size: 20px; color: #1a1a2e; }
+
+        .btn-add {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover { background: #c0392b; }
+
+        /* ── FORM ── */
+        .form-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            display: none;
+        }
+
+        .form-card h3 { font-size: 16px; margin-bottom: 18px; color: #1a1a2e; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 10px 14px;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .btn-save {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background: #f5f5f5;
+            color: #555;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* ── CARDS LIST ── */
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-info h3 { font-size: 16px; margin-bottom: 4px; }
+        .card-info p { font-size: 13px; color: #666; }
+        .card-info .badge {
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .card-info .badge.event {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .btn-delete {
+            background: #ffeaea;
+            color: #e74c3c;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-delete:hover { background: #ffcdd2; }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: #aaa;
+            background: white;
+            border-radius: 14px;
+        }
+
+        .empty-state div { font-size: 40px; margin-bottom: 12px; }
+        .empty-state p { font-size: 15px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="loginScreen">
+    <div class="login-card">
+        <h1>🍕 Admin Panel</h1>
+        <p>Sign in to manage your restaurant</p>
+        <input type="text" id="username" placeholder="Username" />
+        <input type="password" id="password" placeholder="Password" onkeydown="if(event.key==='Enter')login()" />
+        <button class="btn-login" onclick="login()">Sign In</button>
+        <p class="login-error" id="loginError">Invalid username or password</p>
+    </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+    <header>
+        <div>
+            <h1>🍕 Restaurant Admin Panel</h1>
+            <span>Manage offers, events & specials</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </header>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('offers')">🏷️ Daily Offers</div>
+        <div class="tab" onclick="switchTab('events')">🎵 Events & Music</div>
+    </div>
+
+    <div class="content">
+
+        <!-- OFFERS TAB -->
+        <div class="tab-content active" id="tab-offers">
+            <div class="section-header">
+                <h2>Today's Special Offers</h2>
+                <button class="btn-add" onclick="showForm('offer')">+ Add Offer</button>
+            </div>
+
+            <div class="form-card" id="form-offer">
+                <h3>Add New Offer</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Offer Title</label>
+                        <input type="text" id="offer-title" placeholder="e.g. Happy Hour" />
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="offer-date" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="offer-description" placeholder="e.g. 20% off all drinks until 7pm" />
+                </div>
+                <div class="form-group">
+                    <label>Valid Until (optional)</label>
+                    <input type="text" id="offer-validUntil" placeholder="e.g. 7:00 PM" />
+                </div>
+                <div class="form-actions">
+                    <button class="btn-save" onclick="saveOffer()">Save Offer</button>
+                    <button class="btn-cancel" onclick="hideForm('offer')">Cancel</button>
+                </div>
+            </div>
+
+            <div id="offers-list"></div>
+        </div>
+
+        <!-- EVENTS TAB -->
+        <div class="tab-content" id="tab-events">
+            <div class="section-header">
+                <h2>Upcoming Events & Music</h2>
+                <button class="btn-add" onclick="showForm('event')">+ Add Event</button>
+            </div>
+
+            <div class="form-card" id="form-event">
+                <h3>Add New Event</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Title</label>
+                        <input type="text" id="event-title" placeholder="e.g. Live Jazz Night" />
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="event-date" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="event-description" placeholder="e.g. Live jazz by Jimmy — perfect for a romantic dinner" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="text" id="event-startTime" placeholder="e.g. 7:00 PM" />
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="text" id="event-endTime" placeholder="e.g. 10:00 PM" />
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-save" onclick="saveEvent()">Save Event</button>
+                    <button class="btn-cancel" onclick="hideForm('event')">Cancel</button>
+                </div>
+            </div>
+
+            <div id="events-list"></div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // Change this to your Railway URL when deploying
+    const BASE_URL = '';
+
+    // ── SET TODAY'S DATE AS DEFAULT ──
+    window.onload = () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('offer-date').value = today;
+        document.getElementById('event-date').value = today;
+    };
+
+    // ── AUTH ──
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const res = await fetch(`${BASE_URL}/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+            credentials: 'include'
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            loadOffers();
+            loadEvents();
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+        }
+    }
+
+    async function logout() {
+        await fetch(`${BASE_URL}/admin/logout`, { method: 'POST', credentials: 'include' });
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+    }
+
+    // ── TABS ──
+    function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+
+    // ── FORMS ──
+    function showForm(type) {
+        document.getElementById(`form-${type}`).style.display = 'block';
+    }
+
+    function hideForm(type) {
+        document.getElementById(`form-${type}`).style.display = 'none';
+    }
+
+    // ── OFFERS ──
+    async function loadOffers() {
+        const res = await fetch(`${BASE_URL}/admin/offers`, { credentials: 'include' });
+        const offers = await res.json();
+        const list = document.getElementById('offers-list');
+
+        if (offers.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div>🏷️</div>
+                    <p>No offers today. Add one to promote to your customers!</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = offers.map(o => `
+            <div class="card">
+                <div class="card-info">
+                    <h3>${o.title}</h3>
+                    <p>${o.description}</p>
+                    ${o.validUntil ? `<span class="badge">Valid until ${o.validUntil}</span>` : ''}
+                </div>
+                <button class="btn-delete" onclick="deleteOffer(${o.id})">Delete</button>
+            </div>
+        `).join('');
+    }
+
+    async function saveOffer() {
+        const offer = {
+            title: document.getElementById('offer-title').value,
+            date: document.getElementById('offer-date').value,
+            description: document.getElementById('offer-description').value,
+            validUntil: document.getElementById('offer-validUntil').value
+        };
+
+        if (!offer.title || !offer.description || !offer.date) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+
+        await fetch(`${BASE_URL}/admin/offers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(offer),
+            credentials: 'include'
+        });
+
+        hideForm('offer');
+        loadOffers();
+        showToast('Offer added successfully!');
+
+        document.getElementById('offer-title').value = '';
+        document.getElementById('offer-description').value = '';
+        document.getElementById('offer-validUntil').value = '';
+    }
+
+    async function deleteOffer(id) {
+        if (!confirm('Delete this offer?')) return;
+        await fetch(`${BASE_URL}/admin/offers/${id}`, { method: 'DELETE', credentials: 'include' });
+        loadOffers();
+        showToast('Offer deleted');
+    }
+
+    // ── EVENTS ──
+    async function loadEvents() {
+        const res = await fetch(`${BASE_URL}/admin/events`, { credentials: 'include' });
+        const events = await res.json();
+        const list = document.getElementById('events-list');
+
+        if (events.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <div>🎵</div>
+                    <p>No upcoming events. Add live music or special nights!</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = events.map(e => `
+            <div class="card">
+                <div class="card-info">
+                    <h3>${e.title}</h3>
+                    <p>${e.description}</p>
+                    <span class="badge event">
+                        📅 ${e.date}
+                        ${e.startTime ? ` · ${e.startTime}` : ''}
+                        ${e.endTime ? ` – ${e.endTime}` : ''}
+                    </span>
+                </div>
+                <button class="btn-delete" onclick="deleteEvent(${e.id})">Delete</button>
+            </div>
+        `).join('');
+    }
+
+    async function saveEvent() {
+        const event = {
+            title: document.getElementById('event-title').value,
+            date: document.getElementById('event-date').value,
+            description: document.getElementById('event-description').value,
+            startTime: document.getElementById('event-startTime').value,
+            endTime: document.getElementById('event-endTime').value
+        };
+
+        if (!event.title || !event.description || !event.date) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+
+        await fetch(`${BASE_URL}/admin/events`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event),
+            credentials: 'include'
+        });
+
+        hideForm('event');
+        loadEvents();
+        showToast('Event added successfully!');
+
+        document.getElementById('event-title').value = '';
+        document.getElementById('event-description').value = '';
+        document.getElementById('event-startTime').value = '';
+        document.getElementById('event-endTime').value = '';
+    }
+
+    async function deleteEvent(id) {
+        if (!confirm('Delete this event?')) return;
+        await fetch(`${BASE_URL}/admin/events/${id}`, { method: 'DELETE', credentials: 'include' });
+        loadEvents();
+        showToast('Event deleted');
+    }
+
+    // ── TOAST ──
+    function showToast(msg, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.style.background = type === 'error' ? '#e74c3c' : '#27ae60';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+</script>
+
+</body>
+</html>

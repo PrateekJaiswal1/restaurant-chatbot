@@ -43,6 +43,9 @@ public class AnthropicService {
     @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private EventOfferService eventOfferService;
+
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -113,6 +116,8 @@ public class AnthropicService {
                     input.get("reservation_id").asLong()
             );
             case "get_todays_specials" -> reservationService.getTodaysSpecials();
+            case "get_todays_offers"   -> eventOfferService.getTodaysOffers();
+            case "get_upcoming_events" -> eventOfferService.getUpcomingEvents();
             default -> "Unknown tool: " + toolName;
         };
     }
@@ -217,6 +222,8 @@ public class AnthropicService {
         2. Make reservations (saves to database instantly)
         3. Cancel existing reservations
         4. Get today's specials from the kitchen
+        5. Get today's special offers and discounts
+        6. Get upcoming events and live music schedule
         
         Today's date is: %s
         """,
@@ -269,6 +276,16 @@ public class AnthropicService {
               {
                 "name": "get_todays_specials",
                 "description": "Get today's special dishes and prices",
+                "input_schema": { "type": "object", "properties": {}, "required": [] }
+              },
+              {
+                "name": "get_todays_offers",
+                "description": "Get today's special offers and discounts",
+                "input_schema": { "type": "object", "properties": {}, "required": [] }
+              },
+              {
+                "name": "get_upcoming_events",
+                "description": "Get upcoming events, live music, and entertainment schedule",
                 "input_schema": { "type": "object", "properties": {}, "required": [] }
               }
             ]
